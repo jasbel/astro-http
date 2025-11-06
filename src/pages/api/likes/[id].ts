@@ -5,6 +5,8 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ params, request }) => {
   const postId = params.id ?? "";
+  console.log({postId});
+  
 
   const posts = await db.select().from(Posts).where(eq(Posts.id, postId));
 
@@ -14,6 +16,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       title: "Not found Posts",
       likes: 0,
     };
+
     return new Response(JSON.stringify(post), {
       status: 200,
       headers: {
@@ -34,7 +37,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
   const postId = params.id ?? "";
 
   const posts = await db.select().from(Posts).where(eq(Posts.id, postId));
-  const {likes = 0} = await request.json()
+  const { likes = 0 } = await request.json();
 
   if (posts.length === 0) {
     const newPost = {
@@ -44,20 +47,18 @@ export const PUT: APIRoute = async ({ params, request }) => {
     };
 
     await db.insert(Posts).values(newPost);
-    posts.push(newPost)
+    posts.push(newPost);
   }
 
-  const post = posts.at(0)!
-  post.likes = post.likes + likes
+  const post = posts.at(0)!;
+  post.likes = post.likes + likes;
 
-  await db.update(Posts).set(post).where(
-    eq(Posts.id, postId)
-  )
+  await db.update(Posts).set(post).where(eq(Posts.id, postId));
 
-  return new Response("ok", {
+  return new Response("ok!", {
     status: 200,
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 };
