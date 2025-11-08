@@ -7,10 +7,13 @@
 
     <span>{{ likeCount }}</span>
   </button>
+
+  {{ likeClick }}
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import confettu from 'canvas-confetti'
 import debounce from 'lodash.debounce';
 
 interface Props {
@@ -23,8 +26,31 @@ const likeCount = ref(0)
 const likeClick = ref(0)
 const isLoading = ref(true)
 
+watch(likeCount, debounce(() => {
+  console.log('new likes', likeCount.value);
+  fetch(`/api/likes/${props.postId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({likes: likeClick.value})
+  }).finally(() =>{
+    likeClick.value = 0
+  })
+}, 500))
+
 const likepost = () => {
   likeCount.value = likeCount.value+1
+  likeClick.value++
+
+  confettu({
+    particleCount: 100,
+    spread: 70,
+    origin: {
+      x:Math.random(),
+      y: Math.random() - 0.2
+    }
+  })
 }
 
 const getCurrentLikes = async () => {
@@ -59,3 +85,5 @@ button:hover {
   background-color: #4a3f9a;
 }
 </style>
+
+<!-- npx astro db push --remote => manda cambios locales al de produccion -->
